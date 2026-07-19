@@ -12,11 +12,50 @@ const app = express();
 app.use(express.json()); 
 app.use(cors());
 app.use(express.static('public'));
+
+const authenticateToken = (req, res, next) => {
+  try {
+    // Get Authorization header
+    const authHeader = req.headers['authorization'];
+    
+    // Check if header exists and starts with 'Bearer '
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Access Denied: No Token Provided' 
+      });
+    }
+
+    // Extract token
+    const token = authHeader.split(' ')[1];
+
+    // Verify token
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Access Denied: Invalid or Expired Token' 
+        });
+      }
+
+      // Attach decoded user information to request
+      req.user = decoded;
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: 'Authentication error occurred',
+      error: error.message 
+    });
+  }
+};
+
 app.post("/api/login", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-//   const {username, password} = req.body
-  console.log(`user : ${username}, password : ${password}`);
+  // const {username, password} = req.body
+  // console.log(`user : ${username}, password : ${password}`);
   
 
   const [users] = await db.query("SELECT * FROM users WHERE username = ? ", [username]);
