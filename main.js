@@ -44,6 +44,6 @@ app.post("/api/login", async (req, res) => {
 
 });
 
-app.listen(3000, () => {
-  console.log("Server ทำงานที่ http://localhost:3000"); 
+app.listen(process.env.PORT, () => {
+  console.log("Server ทำงานที่ http://localhost:"+process.env.PORT); 
 });
