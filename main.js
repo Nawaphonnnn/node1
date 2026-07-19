@@ -7,6 +7,7 @@ import cors from 'cors';
 
 dotenv.config();
 
+const JWT_SECRET = process.env.SECRET_KEY
 
 const app = express(); 
 app.use(express.json()); 
@@ -81,6 +82,58 @@ app.post("/api/login", async (req, res) => {
   //  res.send("login success");
 
 
+});
+
+app.post("/api/book" ,authenticateToken, async (req, res) =>{
+  const {title, author, published_year, price} = req.body;
+  try {
+    const [data] = await db.query(`INSERT INTO books
+      (title, author, published_year, price)
+      VALUES (?, ?, ?, ?)` , [title, author, published_year, price]);
+      res.status(201).json({
+        success : true,
+        message : "เพิ่มหนังสือสำเร็จ"
+      })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success : false,
+      message : "เพิ่มหนังสือไม่สำเร็จ"
+    })
+  }  
+});
+
+app.get("/api/book" ,authenticateToken, async (req, res) =>{
+  try {
+    const [data] = await db.query(`SELECT * FROM books`);
+      res.status(200).json({
+        success : true,
+        message : "ดึงข้อมูลหนังสือสำเร็จ",
+        data : data
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success : false,
+      message : "ดึงข้อมูลหนังสือไม่สำเร็จ",
+    });
+  }  
+});
+
+app.delete("/api/book" ,authenticateToken, async (req, res) =>{
+  try {
+    const [data] = await db.query(`DELETE FROM books  WHERE id = ?`,[req.params.id]);
+      res.status(200).json({
+        success : true,
+        message : "ลบหนังสือสำเร็จ",
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success : false,
+      message : "ลบหนังสือไม่สำเร็จ",
+    });
+  }  
 });
 
 app.listen(process.env.PORT, () => {

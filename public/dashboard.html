@@ -140,16 +140,13 @@
               <tr>
                 <th scope="col"># ID</th>
                 <th scope="col">ชื่อหนังสือ</th>
+                <th scope="col">ชื่อผู้แต่ง</th>
                 <th scope="col">ปีที่พิมพ์</th>
                 <th scope="col">ราคา</th>
+                <th scope="col"></th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
+            <tbody id = "table_detail">
               </tr>
             </tbody>
           </table>
@@ -158,15 +155,92 @@
     </div>
 
     <script>
-      add_books = (event) => {
+      add_books = async(event) => {
         event.preventDefault();
         const title = document.querySelector("#title").value;
         const author = document.querySelector("#author").value;
         const published_year = document.querySelector("#published_year").value;
         const price = document.querySelector("#price").value;
-        
-        
+        try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`http://localhost:3000/api/book`, {
+            method : 'POST',
+            headers : {
+              'Content-Type' : 'application/json',
+              'Authorization' : `Bearer ${token}`
+            },
+            body: JSON.stringify({ title, author, published_year, price })
+          });
+
+          const date = await res.json();
+          alert("เพิ่มหนังสือสำเร็จ");
+          //alert(data.messsage);
+        } catch (error){
+          console.log(error);
+          alert("เกิดข้อผิดพลาด");
+        }
+      
       };
+      read_book = async () =>{
+      try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`http://localhost:3000/api/book`, {
+            method : 'GET',
+            headers : {
+              'Content-Type' : 'application/json',
+              'Authorization' : `Bearer ${token}`
+            }
+          });
+          const result = await res.json();
+          let table ='';
+          result.data.forEach(e =>{
+            table +=`
+            <tr>
+              <td>${e.id}</th>
+              <td>${e.title}</td>
+              <td>${e.author}</td>
+              <td>${e.published_year}</td>
+              <td>${e.price}</td> 
+              <td>
+                <button claa> 
+            </tr>` 
+          });
+          document.querySelector("#table_datail").innerHTML = table
+          //alert(data.messsage);
+        } catch (error){
+          console.log(error);
+        }
+      }
+
+       read_book = async (id) =>{
+      try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`http://localhost:3000/api/book`, {
+            method : 'DELETE',
+            headers : {
+              'Content-Type' : 'application/json',
+              'Authorization' : `Bearer ${token}`
+            }
+          });
+          const result = await res.json();
+          let table ='';
+          result.data.forEach(e =>{
+            table +=`
+            <tr>
+              <td>${e.id}</th>
+              <td>${e.title}</td>
+              <td>${e.author}</td>
+              <td>${e.published_year}</td>
+              <td>${e.price}</td> 
+            </tr>` 
+          });
+          document.querySelector("#table_datail").innerHTML = table
+          //alert(data.messsage);
+        } catch (error){
+          console.log(error);
+        }
+      }
+
       main = () => {
         const token = localStorage.getItem("token");
         if (!token) {
